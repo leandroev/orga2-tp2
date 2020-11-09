@@ -1,0 +1,70 @@
+\subsection{Reforzar Brillo}
+\subsubsection{Pseudocódigo del ciclo:}
+Este filtro aumenta y disminuye el brillo de la imagen mediante un cálculo respecto al brillo de cada pixel de la imagen \textbf{src}. \\
+Para eso el filtro posee 4 parámetros de entrada del tipo entero: \textbf{umbralSup}, \textbf{umbralInf}, \textbf{brilloSup} y \textbf{brilloInf}. Si el cálculo queda fuera del rango de los umbrales su brillo aumenta o disminuye en caso de estar por encima del umbral superior o por debajo del inferior respectivamente, cabe aclarar que tanto el aumento y disminución se harán de forma saturada y por separado, para luego mediante una máscara se definirá si se aplican o no a los pixeles de la imagen \textbf{dst}. \\
+En cambio si está dentro del rango de los umbrales su brillo no cambia.
+\begin{codesnippet}
+\begin{verbatim}
+Para i de 0 a height - 1;
+    Para j de 0 a width - 1; 
+        b = (src_matrix[ii][jj].r + 2 * src_matrix[ii][jj].g + src_matrix[ii][jj].b) / 4;
+        Si b > umbralSup:
+            dst_matrix[i][j].b = SATURAR(src_matrix[i][j].b + brilloSup)
+            dst_matrix[i][j].g = SATURAR(src_matrix[i][j].g + brilloSup)
+            dst_matrix[i][j].r = SATURAR(src_matrix[i][j].r + brilloSup)
+        Sino, si umbralInf > b:
+            dst_matrix[i][j].b = SATURAR(src_matrix[i][j].b - brilloInf)
+            dst_matrix[i][j].g = SATURAR(src_matrix[i][j].g - brilloInf)
+            dst_matrix[i][j].r = SATURAR(src_matrix[i][j].r - brilloInf)
+        Sino:
+            dst_matrix[i][j].b = src_matrix[i][j].b
+            dst_matrix[i][j].g = src_matrix[i][j].g
+            dst_matrix[i][j].r = src_matrix[i][j].r
+\end{verbatim}
+\end{codesnippet}
+En este filtro hay que hacer un cálculo muy similar al del filtro fantasma que será utilizado para comparar con los umbrales, pero con valores enteros, entonces el valor de b se va a extender a double word, pero no es necesario convertirlo a float.
+La idea es que en cada ciclo se procesan las imágenes de a dos pixeles. \\
+
+{\centering\textbf{Cálculo de b:}}
+
+Se cargan los dos pixeles de la imagen \textbf{src} en un registro \textbf{XMM}, y se extiende a tamaño word. De esta forma los dos pixeles ocupan cada word del registro y no pierdo precisión. \\
+Se multiplica el valor de los componente G con una máscara de words y deje en 0 el valor los words asociados a la transparencia y el resto no los modifique. \\
+Luego se suman cada componente de forma horizontal con \textbf{PHADDW} 2 veces, teniendo un registro fuente repleto de 0's. \\
+Finalmente se divide por 4 con otra máscara de words, obteniendo finalmente un registro \textbf{XMM} con los valores $|0|0|0|0|0|0|b|b|$. \\
+Haciendo \textbf{PSHUFLW} extendemos b a double word, obteniendo  $|0|0|b|b|$ para poder comparar con los umbrales de tamaño double word. \\
+
+{\centering\textbf{Preparación de los parámetros:}}
+
+Como los umbrales \textbf{umbralSup} y \textbf{umbralInf} se deben comparar con el \textbf{XMM} = $|0|0|b|b|$, debe haber una correspondencia, por eso se cargan los umbrales de la forma $|0|0|umbral|umbral|$ en un registro para cada umbral \textbf{XMM}, esto se puede realizar haciendo moves y shift's o con un shuffle. \\
+
+{\centering\textbf{Resta brilloInf:}}
+
+Se carga de forma escalar el double word \textbf{brilloInf}, y se desempaqueta a word y luego a byte.
+Lo siguiente es asignar a cada byte de la parte baja del registro \textbf{XMM}, el valor de \textbf{brilloInf} con la instrucción \textbf{PSHUFB}, excepto en los correspondientes a la componente de transparencia que tendrán ceros.
+En una copia de los pixeles originales sin extender, se procede a restarles \textbf{brilloInf} a cada componente utilizando \textbf{PSUBUSB}. \\
+
+{\centering\textbf{Suma brilloSup:}}
+
+Se procede igual que con restaInf, obteniendo un registro \textbf{XMM} con cada byte de su parte baja el valor de \textbf{brilloSup} con la instrucción \textbf{PSHUFB}, dejando ceros en los byte correspondientes a la transparencia.
+Y en una copia de los pixeles originales sin extender, se procede a sumarles \textbf{brilloSup} a cada componente utilizando \textbf{PADDUSB}. \\
+
+{\centering\textbf{Comparación umbralInf $>$ b}}
+
+Se utiliza \textbf{PCMPGTD} con el registro de \textbf{umbralInf} como destino y el b como fuente, el resultado será 0x00000000 en los double word que resulten menores o iguales a b y 0xffffffff para los mayores. \\
+
+{\centering\textbf{Comparación b $>$ umbralSup:}}
+
+Se compara usando \textbf{PCMPGTD} con el registro de b como destino y el de \textbf{umbralSup} como fuente, el resultado será 0x00000000 en los double word que resulten menores o iguales al umbral y 0xffffffff para los mayores.\\
+
+{\centering\textbf{Selección de los valores correspondiente:}}
+
+Con estos resultados, se hace un \textbf{PAND} a cada comparación con su correspondiente suma/resta de brillo, dejando en cero los componentes de los pixeles que no cumplían con su correspondiente condición. \\
+
+{\centering\textbf{Caso b entre rango de umbrales}}
+
+Para este caso, se unifican  los resultado de las comparaciones con un \textbf{POR}, y con la instrucción \textbf{PANDN} y los registros que tengan los valores de los pixeles originales se conservan aquellos en los que b se encuentra dentro del rango de ambos umbrales y quedan en 0 los que no.
+
+\medskip
+
+Finalmente se procede a hacer un \textbf{POR} de cada unos de los resultados de cada branch y con la máscara \textbf{[transparencia} se setea la componente A en 255.
+Se repite el ciclo hasta que no queden más pixeles.

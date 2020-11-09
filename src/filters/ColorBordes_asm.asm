@@ -47,23 +47,27 @@ ColorBordes_asm:	; 						rdi <- src, rsi <- dst, edx <- width, ecx <- height
 		movdqu xmm4, [rdi+r9*2] 	; xmm4 = |p3,p2,p1,p0| => fila i+1
 		movdqu xmm5, xmm4
 
-		; calculo for ii
+		; extension de bytes a words
 		punpcklbw xmm0, xmm15 		; desempaqueto en words
 		movdqu xmm10, xmm0 			; guardo copia de xmm0 en xmm10
 		punpckhbw xmm1, xmm15 		; desempaqueto en words
 		movdqu xmm11, xmm1 			; guardo copia de xmm1 en xmm11
-		psubw xmm0, xmm1 			; src_matrix[i-1][j-1] - src_matrix[i-1][j+1] | src_matrix[i-1][j] - src_matrix[i-1][j+2]
-		pabsw xmm0, xmm0 			; valor absoluto xmm0
-
+		
 		punpcklbw xmm2, xmm15 		; desempaqueto en words
 		punpckhbw xmm3, xmm15 		; desempaqueto en words
-		psubw xmm2, xmm3 			; src_matrix[i][j-1] - src_matrix[i][j+1] | src_matrix[i][j] - src_matrix[i][j+2]
-		pabsw xmm2, xmm2 			; valor absoluto xmm2
-
+		
 		punpcklbw xmm4, xmm15		; desempaqueto en words
 		movdqu xmm12, xmm4 			; guardo copia de xmm2 en xmm12
 		punpckhbw xmm5, xmm15 		; desempaqueto en words
 		movdqu xmm13, xmm5 			; guardo copia de xmm5 en xmm13
+		
+		; calculo for ii
+		psubw xmm0, xmm1 			; src_matrix[i-1][j-1] - src_matrix[i-1][j+1] | src_matrix[i-1][j] - src_matrix[i-1][j+2]
+		pabsw xmm0, xmm0 			; valor absoluto xmm0
+
+		psubw xmm2, xmm3 			; src_matrix[i][j-1] - src_matrix[i][j+1] | src_matrix[i][j] - src_matrix[i][j+2]
+		pabsw xmm2, xmm2 			; valor absoluto xmm2
+
 		psubw xmm4, xmm5 			; src_matrix[i+1][j-1] - src_matrix[i+1][j+1] | src_matrix[i+1][j] - src_matrix[i+1][j+2]
 		pabsw xmm4, xmm4 			; valor absoluto xmm4
 		; sumatoria ii

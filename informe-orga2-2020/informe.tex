@@ -1,0 +1,205 @@
+% ******************************************************** %
+%              TEMPLATE DE INFORME ORGA2 v0.1              %
+% ******************************************************** %
+% ******************************************************** %
+%                                                          %
+% ALGUNOS PAQUETES REQUERIDOS (EN UBUNTU):                 %
+% ========================================
+%                                                          %
+% texlive-latex-base                                       %
+% texlive-latex-recommended                                %
+% texlive-fonts-recommended                                %
+% texlive-latex-extra?                                     %
+% texlive-lang-spanish (en ubuntu 13.10)                   %
+% ******************************************************** %
+
+
+\documentclass[a4paper]{article}
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{charter}   % tipografia
+\usepackage{graphicx}
+%\usepackage{makeidx}
+\usepackage{paralist} %itemize inline
+
+%\usepackage{float}
+%\usepackage{amsmath, amsthm, amssymb}
+%\usepackage{amsfonts}
+%\usepackage{sectsty}
+%\usepackage{charter}
+%\usepackage{wrapfig}
+%\usepackage{listings}
+%\lstset{language=C}
+
+% \setcounter{secnumdepth}{2}
+\usepackage{underscore}
+\usepackage{caratula}
+\usepackage{url}
+
+
+% ********************************************************* %
+% ~~~~~~~~              Code snippets             ~~~~~~~~~ %
+% ********************************************************* %
+
+\usepackage{color} % para snipets de codigo coloreados
+\usepackage{fancybox}  % para el sbox de los snipets de codigo
+
+\definecolor{litegrey}{gray}{0.94}
+
+\newenvironment{codesnippet}{%
+	\begin{Sbox}\begin{minipage}{\textwidth}\sffamily\small}%
+	{\end{minipage}\end{Sbox}%
+		\begin{center}%
+		\vspace{-0.4cm}\colorbox{litegrey}{\TheSbox}\end{center}\vspace{0.3cm}}
+
+
+
+% ********************************************************* %
+% ~~~~~~~~         Formato de las páginas         ~~~~~~~~~ %
+% ********************************************************* %
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+
+%\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection\ - #1}}
+%\renewcommand{\sectionmark}[1]{\markright{#1}}
+
+\fancyhf{}
+
+\fancyhead[LO]{Sección \rightmark} % \thesection\ 
+\fancyfoot[LO]{\small{Leandro Ezequiel Vigali}}
+\fancyfoot[RO]{\thepage}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0.5pt}
+\setlength{\hoffset}{-0.8in}
+\setlength{\textwidth}{16cm}
+%\setlength{\hoffset}{-1.1cm}
+%\setlength{\textwidth}{16cm}
+\setlength{\headsep}{0.5cm}
+\setlength{\textheight}{25cm}
+\setlength{\voffset}{-0.7in}
+\setlength{\headwidth}{\textwidth}
+\setlength{\headheight}{13.1pt}
+
+\renewcommand{\baselinestretch}{1.1}  % line spacing
+
+% ******************************************************** %
+
+
+\begin{document}
+
+
+\thispagestyle{empty}
+\materia{Organización del Computador II}
+\submateria{Segundo Cuatrimestre de 2020}
+\titulo{Trabajo Práctico II}
+\hspace{20cm}
+\subtitulo{Procesamiento SIMD}
+\integrante{Leandro Ezequiel Vigali}{951/12}{levleandro@gmail.com}
+
+
+\maketitle
+\newpage
+
+%\thispagestyle{empty}
+%\vfill
+%\begin{abstract}
+%En el presente trabajo se describe la problemática de ...
+%\end{abstract}
+
+\thispagestyle{empty}
+\vspace{3cm}
+\tableofcontents
+\newpage
+
+
+%\normalsize
+\newpage
+
+\section{Introducción}
+
+Introducción
+El objetivo de este trabajo práctico consiste en poner en práctica el modelo de procesamiento SIMD (Single Instruction, Multiple Data), que nos ofrece la microarquitectura INTEL64. Este modelo nos permite programar en forma paralela a nivel de datos, es decir, realizar una misma operación sobre un conjunto de datos. A diferencia del modelo SISD (Single Instruction, Single Data) que opera de forma escalar, es decir, un dato por instrucción. \\
+Cada una de estas instrucciones interpreta los datos en un tamaño particular, sin importar lo que estos representen. 
+
+
+\begin{figure}[h]
+  \begin{center}
+	\includegraphics[scale=0.66]{img/simd.jpg}
+	\caption{Representación modelo SISD y SIMD}
+	\label{simd}
+  \end{center}
+\end{figure}
+
+\bigskip
+
+La forma en la que se pone en práctica este modelo es mediante la programación y aplicación de filtros sobre imágenes codificados en lenguaje ensamblador.
+Las imágenes utilizadas estarán en formato BMP y trandrán un ancho múltiplo de 8 y mayor a 16.
+Cada implementación tendrá como objetivo procesar las imágenes de a dos o más pixeles por ciclo.
+La Cátedra provee los algoritmos y código C de cada filtro, junto al framework para leer y escribir las imágenes, compilar y testear los resultados obtenidos. Por lo que programarlos en assembler es la primer parte del trabajo.
+
+\bigskip
+
+La otra parte del trabajo consiste en realizar un análisis experimental del funcionamiento de los filtros para entender y razonar sobre el modelo SIMD. Con ese objetivo se realizaron dos experimentos, que fueron desarrollados y analizados, llegando a una conclusión respecto a los resultados obtenidos y los esperados.
+
+
+\bigskip
+
+{\centering\textbf{\large{Sobre el formato BMP}}} 
+
+\medskip
+
+El formato BMP tiene un encabezado y un mapa de bits que representa la información de los pixeles. La biblioteca provista soporta tres tipos de formatos, con o sin transparencia, estos formatos corresponden a los tipos de encabezados BITMAPINFOHEADER (40 bytes), BITMAPV3INFOHEADER (56 bytes) y BITMAPV5HEADER (124 bytes).
+En este tipo de imágenes, el mapa de bits está almacenado de forma que las líneas de la imagen están invertidas, es decir la primera fila de la imagen, se encuentra la última línea. En cada línea los pixeles se almacenan de izquierda a derecha. Pero el framework provisto invierte las líneas para operar con la imagen de forma ordenada.Gracias a dicho framework, podremos tratar cada pixel como un elemento de la imagen vista como una matriz.
+Cada pixel posee 4 componentes de tamaño 1 byte cada uno en el siguiente orden: azul (b), verde (g), rojo (r) y transparencia (a).
+Las funciones implementadas reciben un puntero al primer pixel correspondiente a la posición [0,0] de la imagen fuente, así también para la imagen destino que contendrá los valores  correspondientes de aplicar el filtro a los pixeles fuentes.
+En todos los casos el valor de la transparencia (a) será 255.
+
+\section{Desarrrollo}
+
+\subsection{Parámetros de las funciones}
+La siguiente serie de parámetros son provistos a todos los filtros en el siguiente orden:
+\begin{itemize}
+    \item - src: puntero al inicio de la matriz de pixeles de la imagen entrada
+    \item - dst: puntero al inicio de la matriz de pixeles de la imagen salida
+    \item - height: representa el alto (cantidad de filas) en pixeles de la imagen, tanto de entrada como de salida
+    \item - width: representa el ancho (cantidad de columnas) en pixeles de la imagen, tanto entrada como salida
+    \item - src_row_size y dst_row_size: representa el ancho en bytes de cada fila.
+\end{itemize}
+ Cualquier otro parámetro adicional será particular de cada filtro.
+
+
+\input{Filtros/Fantasma}
+\input{Filtros/Bordes}
+\input{Filtros/Reforzar}
+\input{Filtros/Pixelado}
+
+\newpage
+\paragraph{\textbf{Título del párrafo} } Bla bla bla bla.
+Esto se muestra en la figura~\ref{simd}.
+
+
+
+\begin{codesnippet}
+\begin{verbatim}
+
+struct Pepe {
+
+    ...
+
+};
+
+\end{verbatim}
+\end{codesnippet}
+
+\newpage
+\section{Resultados}
+%\input{enunciado}
+
+\newpage
+\section{Conclusión}
+
+
+\end{document}
+
