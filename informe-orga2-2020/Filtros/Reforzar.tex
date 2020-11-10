@@ -1,8 +1,9 @@
 \subsection{Reforzar Brillo}
-\subsubsection{Pseudocódigo del ciclo:}
 Este filtro aumenta y disminuye el brillo de la imagen mediante un cálculo respecto al brillo de cada pixel de la imagen \textbf{src}. \\
 Para eso el filtro posee 4 parámetros de entrada del tipo entero: \textbf{umbralSup}, \textbf{umbralInf}, \textbf{brilloSup} y \textbf{brilloInf}. Si el cálculo queda fuera del rango de los umbrales su brillo aumenta o disminuye en caso de estar por encima del umbral superior o por debajo del inferior respectivamente, cabe aclarar que tanto el aumento y disminución se harán de forma saturada y por separado, para luego mediante una máscara se definirá si se aplican o no a los pixeles de la imagen \textbf{dst}. \\
 En cambio si está dentro del rango de los umbrales su brillo no cambia.
+
+\subsubsection{Pseudocódigo del ciclo:}
 \begin{codesnippet}
 \begin{verbatim}
 Para i de 0 a height - 1;
@@ -22,6 +23,8 @@ Para i de 0 a height - 1;
             dst_matrix[i][j].r = src_matrix[i][j].r
 \end{verbatim}
 \end{codesnippet}
+
+\subsubsection{Idea general del ciclo en ASM}
 En este filtro hay que hacer un cálculo muy similar al del filtro fantasma que será utilizado para comparar con los umbrales, pero con valores enteros, entonces el valor de b se va a extender a double word, pero no es necesario convertirlo a float.
 La idea es que en cada ciclo se procesan las imágenes de a dos pixeles. \\
 
@@ -39,7 +42,7 @@ Como los umbrales \textbf{umbralSup} y \textbf{umbralInf} se deben comparar con 
 
 {\centering\textbf{Resta brilloInf:}}
 
-Se carga de forma escalar el double word \textbf{brilloInf}, y se desempaqueta a word y luego a byte.
+Se carga de forma escalar el double word \textbf{brilloInf}, y se desempaqueta sin signo y con saturación a word y luego a byte.
 Lo siguiente es asignar a cada byte de la parte baja del registro \textbf{XMM}, el valor de \textbf{brilloInf} con la instrucción \textbf{PSHUFB}, excepto en los correspondientes a la componente de transparencia que tendrán ceros.
 En una copia de los pixeles originales sin extender, se procede a restarles \textbf{brilloInf} a cada componente utilizando \textbf{PSUBUSB}. \\
 
@@ -66,5 +69,5 @@ Para este caso, se unifican  los resultado de las comparaciones con un \textbf{P
 
 \medskip
 
-Finalmente se procede a hacer un \textbf{POR} de cada unos de los resultados de cada branch y con la máscara \textbf{[transparencia} se setea la componente A en 255.
+Finalmente se procede a hacer un \textbf{POR} de cada unos de los resultados de cada branch y con la máscara \textbf{[transparencia]} se setea la componente A en 255.
 Se repite el ciclo hasta que no queden más pixeles.

@@ -1,8 +1,11 @@
 \subsection{Pixelado diferencial}
-El efecto de pixelado diferencial divide la imagen en cuadrados de 4x4 pixeles, y determina si se deben copiar los 16 pixeles originales o el promedio de estos, según si la diferencia absoluta entre el cuadrado de 4x4 y el promedio supera un umbral dado por parámetro.
+El efecto de pixelado diferencial divide la imagen en cuadrados de 4x4 pixeles, y determina si se deben copiar los 16 pixeles originales o el promedio de estos, según si la diferencia absoluta entre el cuadrado de 4x4 y el promedio supera un umbral dado por parámetro. \\
 
+\medskip
+
+El filtro se aplica a todos los pixeles, en este caso se procesa de a 16 pixeles, porque en caso de tener que pixelar les corresponden los mismos valores a cada pixel. 
+Como se utilizan imágenes de un ancho múltiplo de 8, no hay problemas a la hora de recorrer cada fila. Pero puede o no haber problemas en las últimas filas de la imagen. Si la cantidad de filas no es múltiplo de 4, que se puede chequear con ayuda de los datos de entrada y agregar saltos para resolver ese caso particular dependiendo de las filas que queden por recorrer. \\
 \subsubsection{Pseudocódigo del ciclo:}
-
 \begin{codesnippet}
 \begin{verbatim}
 Para i de 0 a height - 1;
@@ -40,26 +43,27 @@ Para i de 0 a height - 1;
     i = i+4;
 \end{verbatim}
 \end{codesnippet}
-El filtro se aplica a todos los pixeles, en este caso se procesa de a 16 pixeles, porque en caso de tener que pixelar les corresponden los mismos valores a cada pixel. \\
-Como se utilizan imágenes de un ancho múltiplo de 8, no hay problemas a la hora de recorrer cada fila. Pero puede o no haber problemas en las últimas filas de la imagen. Si la cantidad de filas no es múltiplo de 4, que se puede chequear con ayuda de los datos de entrada y agregar saltos para resolver ese caso particular dependiendo de las filas que queden por recorrer. \\
 
-\subsubsection{Implementación del ciclo en ASM}
+\subsubsection{Idea general del ciclo en ASM}
 
 En cada ciclo se cargarán en 4 registros \textbf{XMM} 16 bytes de la imagen correspondientes a 4 filas consecutivas, es decir 4 pixeles en cada registro. \\
 Luego se desempaquetan a word tanto su parte alta como baja de los registros \textbf{XMM}, por lo que se tendrán 8 registros \textbf{XMM} con los valores de 2 pixeles cada uno.\\
 
 {\centering\textbf{Cálculo del promedio:}}
 
-Para el promedio simplemente se suman todos los registros con la instrucción \textbf{PADDW}, luego con una máscara se divide cada word por 16 usando \textbf{PSRLW} y el inmediato con el valor 4, que serán la cantidad de bits que cada word se shifteará a derecha. \\
+Para el promedio simplemente se suman todos los registros con la instrucción \textbf{PADDW}, se suma la parte alta con la parte baja del registro y se divide por 16 la word usando \textbf{PSRLW} y el inmediato con el valor 4, que serán la cantidad de bits que cada word se shifteará a derecha.
+Finalmente se copia la parte baja del registro con los promedios a su parte alta.
 
 {\centering\textbf{Cálculo de la diferencia:}}
 
 Se utilizará un registro \textbf{XMM} como acumulador, realizando una sumatoria de los resultados de varias operaciones.\\
-Estas operaciones consistirán calcular la diferencia del promedio, del cual se hará una copia para conservar su valor original, y luego se procederá a restarle un pixel, se toma el valor absoluto y se suman las componentes entre sí y se suma el resultado al registro acumulador usando \textbf{PADDW}. \\
-Esto para cada uno de los 16 pixeles. \\
+Estas operaciones consistirán en calcular la diferencia del promedio con cada uno de los 16 pixeles, para ello habrá una copia de este y los pixeles para conservar su valor original, y luego se procederá a restarle uno de los pixeles extendidos a 8 bytes, se toma el valor absoluto y se suman las componentes entre sí para finalmente sumar el resultado al registro acumulador usando \textbf{PADDW}. \\
+Esto para cada uno de los 16 pixeles, en realidad 8 de estos a la parte baja y los otros 8 a la parte alta del registro del promedio.  \\
+Finalmente se suman la parte alta con la parte baja del promedio, terminando con la acumulación. \\
 
 {\centering\textbf{Aplicación según umbral:}}
 
+Se empaqueta el registro promedio de word a byte sin signo y con saturación. \\
 Usando \textbf{MOVD} y \textbf{PSLLDQ} se ubicará cada valor de value (registro acumulador) en los 2 quad words del registro, lo mismo se hará con el dato de entrada entero \textbf{limit}. \\
 De esta forma haciendo pcmpgtq se obtendrá un registro repleto de 1's o 0's, dependiendo si value es mayor a \textbf{limit} o menor en ese orden. \\
 Luego hago un \textbf{PAND} entre los promedios y la máscara obtenida. 

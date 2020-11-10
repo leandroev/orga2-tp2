@@ -119,8 +119,7 @@
 
 \section{Introducción}
 
-Introducción
-El objetivo de este trabajo práctico consiste en poner en práctica el modelo de procesamiento SIMD (Single Instruction, Multiple Data), que nos ofrece la microarquitectura INTEL64. Este modelo nos permite programar en forma paralela a nivel de datos, es decir, realizar una misma operación sobre un conjunto de datos. A diferencia del modelo SISD (Single Instruction, Single Data) que opera de forma escalar, es decir, un dato por instrucción. \\
+El objetivo de este trabajo práctico consiste en poner en práctica el modelo de procesamiento \textbf{SIMD} (Single Instruction, Multiple Data), que nos ofrece la microarquitectura \textbf{INTEL64}. Este modelo nos permite programar en forma paralela a nivel de datos, es decir, realizar una misma operación sobre un conjunto de datos. A diferencia del modelo \textbf{SISD} (Single Instruction, Single Data) que opera de forma escalar, es decir, un dato por instrucción. \\
 Cada una de estas instrucciones interpreta los datos en un tamaño particular, sin importar lo que estos representen. 
 
 
@@ -141,7 +140,7 @@ La Cátedra provee los algoritmos y código C de cada filtro, junto al framework
 
 \bigskip
 
-La otra parte del trabajo consiste en realizar un análisis experimental del funcionamiento de los filtros para entender y razonar sobre el modelo SIMD. Con ese objetivo se realizaron dos experimentos, que fueron desarrollados y analizados, llegando a una conclusión respecto a los resultados obtenidos y los esperados.
+La otra parte del trabajo consiste en realizar un análisis experimental del funcionamiento de los filtros para entender y razonar sobre el modelo \textbf{SIMD}. Con ese objetivo se realizaron dos experimentos, que fueron desarrollados y analizados, llegando a una conclusión respecto a los resultados obtenidos y los esperados.
 
 
 \bigskip
@@ -161,11 +160,11 @@ En todos los casos el valor de la transparencia (a) será 255.
 \subsection{Parámetros de las funciones}
 La siguiente serie de parámetros son provistos a todos los filtros en el siguiente orden:
 \begin{itemize}
-    \item - src: puntero al inicio de la matriz de pixeles de la imagen entrada
-    \item - dst: puntero al inicio de la matriz de pixeles de la imagen salida
-    \item - height: representa el alto (cantidad de filas) en pixeles de la imagen, tanto de entrada como de salida
-    \item - width: representa el ancho (cantidad de columnas) en pixeles de la imagen, tanto entrada como salida
-    \item - src_row_size y dst_row_size: representa el ancho en bytes de cada fila.
+    \item \textbf{- src:} puntero al inicio de la matriz de pixeles de la imagen entrada
+    \item \textbf{- dst:} puntero al inicio de la matriz de pixeles de la imagen salida
+    \item \textbf{- height:} representa el alto (cantidad de filas) en pixeles de la imagen, tanto de entrada como de salida
+    \item \textbf{- width:} representa el ancho (cantidad de columnas) en pixeles de la imagen, tanto entrada como salida
+    \item \textbf{- src_row_size y dst_row_size:} representa el ancho en bytes de cada fila.
 \end{itemize}
  Cualquier otro parámetro adicional será particular de cada filtro.
 
@@ -175,31 +174,10 @@ La siguiente serie de parámetros son provistos a todos los filtros en el siguie
 \input{Filtros/Reforzar}
 \input{Filtros/Pixelado}
 
-\newpage
-\paragraph{\textbf{Título del párrafo} } Bla bla bla bla.
-Esto se muestra en la figura~\ref{simd}.
-
-
-
-\begin{codesnippet}
-\begin{verbatim}
-
-struct Pepe {
-
-    ...
-
-};
-
-\end{verbatim}
-\end{codesnippet}
-
-\newpage
-\section{Resultados}
-%\input{enunciado}
+\section{Experimentación}
 
 \newpage
 \section{Conclusión}
-
 
 \end{document}
 

@@ -16,8 +16,8 @@ Para i de 0 a height - 1;
 \end{codesnippet}
 
 \subsubsection{Implementación del ciclo en ASM}
-Como este filtro opera con todos los pixeles, se recorren desde el primer al último pixel de las imágenes de a dos pixeles por ciclo. Paralelamente voy recorriendo la submatriz fantasma de a un pixel por ciclo, con la ayuda de un registro que contendrá la dirección de memoria correspondiente al \textbf{offsetX} e \textbf{offsetY}. 
-Pero a diferencia de la matriz fuente y destino, en la submatriz fantasma las filas se recorren dos veces consecutivamente. \\
+Como este filtro opera con todos los pixeles, se recorren desde el primer al último pixel de las imágenes de a dos pixeles por ciclo. Paralelamente voy recorriendo la submatriz fantasma de a un pixel por ciclo, con la ayuda de un registro que contendrá la dirección de memoria correspondiente al \textbf{offsetX} y \textbf{offsetY}. 
+Pero a diferencia de la matriz fuente y destino, en la submatriz fantasma las filas se recorren dos veces consecutivamente.
 Adicionalmente se declaran en memoria los siguientes datos floats que para realizar los cálculos necesarios: 
 \begin{codesnippet}
 \begin{verbatim}   
@@ -37,9 +37,10 @@ Luego se shiftea 4 bytes a la derecha para dejar en 0's el último float, que se
 Finalmente se divide el registro por [div8], finalizando el cálculo de b y representando lo siguiente:
 \begin{codesnippet}
 \begin{verbatim}
-        XMM = |0|b/2|b/2|b/2|;
+        XMM = |0|b/2|b/2|b/2|; uno por cada pixel
 \end{verbatim}
 \end{codesnippet}
+Cabe aclarar que son dos registros \textbf{XMM}, uno correspondiente a cada pixel.
 
 \begin{figure}[h]
   \begin{center}
@@ -51,13 +52,13 @@ Finalmente se divide el registro por [div8], finalizando el cálculo de b y repr
 
 {\centering\textbf{Procesado de los pixeles [i][j] y [i][j+1]:}}
 
-Se cargan en un registro\textbf{XMM} 2 pixeles (8 bytes) de la imagen \textbf{src}.
+Se cargan en un registro \textbf{XMM} 2 pixeles (8 bytes) de la imagen \textbf{src}.
 Se desempaqueta la parte baja de byte a word, luego se guarda una copia del registro, y se desempaqueta cada componente de word a doubleword, sólo que para un registro la parte baja y para el otro la parte alta. \\
 Obteniendo los valores de los componentes del pixel [i][j] en un registro y los de [i][j+1] en el otro. Y se convierten a float. \\
 Luego se multiplica cada uno por los valores de \textbf{[mul09]}. 
 Y se suma el registro que contiene 4 floats con el valor b/2 previamente calculado. \\
 Luego se convierten los registros a datos enteros, se empaquetan a word y luego a byte sin signo y con saturación, obteniendo los valores esperados. \\
-Finalmente se escriben en la imagen \textbf{dst}.
+Finalmente se escriben en la imagen \textbf{dst}. En la figura~\ref{calcb} hay una representación del proceso en distintos ciclos. \\
 \begin{codesnippet}
 \begin{verbatim}
         dst_matrix[i][j].r = SATURAR(src_matrix[i][j].r * 0.9 + b/2);
