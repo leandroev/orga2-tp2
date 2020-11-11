@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <libgen.h>
 
-#include "tp2.h"
+#include "tp2_exp.h"
 #include "helper/tiempo.h"
 #include "helper/libbmp.h"
 #include "helper/utils.h"

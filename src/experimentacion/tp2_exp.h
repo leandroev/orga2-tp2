@@ -9,7 +9,7 @@
 struct timespec {
     time_t tv_sec;        // seconds 
     long   tv_nsec;       // nanoseconds 
-/*};*/
+};*/
 
 #define FILTRO_C   0
 #define FILTRO_ASM 1
