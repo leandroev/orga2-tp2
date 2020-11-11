@@ -1,4 +1,3 @@
-extern ColorBordes_c
 global ColorBordes_asm
 
 section .rodata

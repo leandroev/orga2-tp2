@@ -1,4 +1,3 @@
-extern ImagenFantasma_c
 global ImagenFantasma_asm
 
 section .rodata
@@ -59,7 +58,7 @@ ImagenFantasma_asm:
 	.ciclo:
 	; calculo b/2
 	movd xmm5, [r15] 		; xmm5: |0|...|0|a0|r0|g0|b0|
-	punpcklbw xmm5, xmm15 	; xmm5: |0|...|01|r1|g1|b1|a0|r0|g0|b0|
+	punpcklbw xmm5, xmm15 	; xmm5: |0|0|0|0|a0|r0|g0|b0|
 	punpcklwd xmm5, xmm15 	; xmm5: |a0|r0|g0|b0|
 	
 	cvtdq2ps xmm5, xmm5		; convierto a floats
@@ -70,8 +69,9 @@ ImagenFantasma_asm:
 	psrldq xmm5, 4 			; xmm5: |0|r0+2*g0+b0|r0+2*g0+b0|r0+2*g0+b0|
 	
 	divps xmm5, xmm12 		; xmm5: |0|b/2|b/2|b/2|
-
-	movq xmm0, [rdi] 		; xmm0: 127-bit |0000|0000|pixel1|pixel 0| 0-bit 
+	
+	; procedimieto de los pixeles
+	movq xmm0, [rdi] 		; xmm0: 127-bit |0000|0000|pixel1|pixel 0| 0-bit	=
 							; xmm0: 127-bit |0|0|0|0|0|0|0|0|a1|r1|g1|b1|a0|r0|g0|b0| 0-bit 
 	punpcklbw xmm0, xmm15 	; xmm0: |a1|r1|g1|b1|a0|r0|g0|b0|
 	movdqu xmm1, xmm0 		; xmm1 = xmm0
@@ -91,7 +91,7 @@ ImagenFantasma_asm:
 	cvtps2dq xmm1, xmm1 	; convierto a enteros
 	 
 	packusdw xmm0, xmm1 	; (|a1|r1|g1|b1|a0|r0|g0|b0|) * 0.9 + b/2
-	packuswb xmm0, xmm15     ; (|0|0|0|0|0|0|0|0|a1|r1|g1|b1|a0|r0|g0|b0|) * 0.9 + b/2
+	packuswb xmm0, xmm15    ; (|0|0|0|0|0|0|0|0|a1|r1|g1|b1|a0|r0|g0|b0|) * 0.9 + b/2
 
 	movq [rsi], xmm0 		; *src <- xmm0 : pixel 1|pixel 0	
 	
