@@ -5,7 +5,7 @@
 CFLAGS64 = -ggdb -Wall -Wno-unused-parameter -Wextra -std=c99 -DD_POSIX_SOURCE -D_GNU_SOURCE -lrt -lpthread -no-pie -pedantic -m64 -O0 -march=native -fno-common 
 CFLAGS=$(CFLAGS64)
 
-BUILD_DIR = build
+BUILD_DIR = ../build
 BIN = tp2
 BIN2 = tp2_exp
 
@@ -31,22 +31,27 @@ all: $(BUILD_DIR)/$(BIN) exp
 $(BUILD_DIR)/$(BIN): FORCE $(MAIN_OBJS_CON_PATH)
 	$(CC) $(CFLAGS) $(OBJS_CON_PATH) -o $@ -lm
 
-exp: $(BUILD_DIR)/$(BIN2)
+exp: $(BIN2)
 
-$(BUILD_DIR)/$(BIN2): FORCE $(MAIN_OBJS_CON_PATH2)
+$(BIN2): $(MAIN_OBJS_CON_PATH2)
 	$(CC) $(CFLAGS) $(OBJS_CON_PATH2) -o $@ -lm
 
 export CFLAGS64
 FORCE:
-	mkdir -p build
-	make -C helper
-	make -C filters
+	mkdir -p ../build
+	make -C ../helper
+	make -C ../filters
+	mkdir -p resultados
+
+$(BUILD_DIR)/%.o: ../%.c
+	$(CC) $(CFLAGS) -c -o $@ $< -lm
 
 $(BUILD_DIR)/%.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $< -lm
 
 clean:
 	rm -fr $(BUILD_DIR)/*
+	rm tp2_exp
 
 
 

@@ -4,10 +4,10 @@
 #include <libgen.h>
 
 #include "tp2_exp.h"
-#include "helper/tiempo.h"
-#include "helper/libbmp.h"
-#include "helper/utils.h"
-#include "helper/imagenes.h"
+#include "../helper/tiempo.h"
+#include "../helper/libbmp.h"
+#include "../helper/utils.h"
+#include "../helper/imagenes.h"
 
 // ~~~ seteo de los filtros ~~~
 
@@ -42,7 +42,7 @@ int main( int argc, char** argv ) {
         printf ( "  Archivo de entrada : %s\n", config.archivo_entrada);
     }
 
-    snprintf(config.archivo_salida, sizeof  (config.archivo_salida), "%s/%s.%s.%s%s.bmp",
+    snprintf(config.archivo_salida, sizeof  (config.archivo_salida), "%s/%s.%s.EXP.%s%s.bmp",
             config.carpeta_salida, basename(config.archivo_entrada),
             config.nombre_filtro,  C_ASM( (&config) ), config.extra_archivo_salida );
 
