@@ -1,4 +1,4 @@
-global ImagenFantasma_asm
+global ImagenFantasma_enteros_asm
 
 section .rodata
 	mul09: dd 0.9, 0.9, 0.9, 1.0
@@ -10,7 +10,7 @@ section .text
 ;                      int src_row_size, int dst_row_size, int offsetx, int offsety);
 ; rdi <- *src, rsi <- *dst, edx <- width, ecx, height, r8d <- src_row_size, r9d <- dst_row_size
 ; stack_arg1 <- offsetx, stack_arg2 <- offsety
-ImagenFantasma_asm:
+ImagenFantasma_enteros_asm:
 	push rbp
 	mov rbp, rsp
 	push rbx

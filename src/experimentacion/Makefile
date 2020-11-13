@@ -7,19 +7,21 @@ CFLAGS=$(CFLAGS64)
 
 BUILD_DIR = ../build
 BIN = tp2
-BIN2 = tp2_exp
 
-FILTROS = ColorBordes ImagenFantasma PixeladoDiferencial ReforzarBrillo
+FILTROS = ColorBordes ImagenFantasma PixeladoDiferencial ReforzarBrillo ImagenFantasma_enteros ImagenFantasma_x4
 
 FILTROS_OBJ = $(addsuffix .o, $(FILTROS)) $(addsuffix _asm.o, $(FILTROS)) $(addsuffix _c.o, $(FILTROS))
 LIBS_OBJS   = libbmp.o imagenes.o utils.o
 MAIN_OBJS   = tp2.o cli.o 
-MAIN_OBJS2   = tp2_exp.o cli.o
 MAIN_OBJS_CON_PATH = $(addprefix $(BUILD_DIR)/, $(MAIN_OBJS))
-MAIN_OBJS_CON_PATH2 = $(addprefix $(BUILD_DIR)/, $(MAIN_OBJS2))
 
 OBJS = $(MAIN_OBJS) $(LIBS_OBJS) $(FILTROS_OBJ)
 OBJS_CON_PATH = $(addprefix $(BUILD_DIR)/, $(OBJS))
+
+BIN2 = tp2_exp
+
+MAIN_OBJS2   = tp2_exp.o cli.o
+MAIN_OBJS_CON_PATH2 = $(addprefix $(BUILD_DIR)/, $(MAIN_OBJS2))
 
 OBJS2 = $(MAIN_OBJS2) $(LIBS_OBJS) $(FILTROS_OBJ)
 OBJS_CON_PATH2 = $(addprefix $(BUILD_DIR)/, $(OBJS2))
@@ -42,6 +44,7 @@ FORCE:
 	make -C ../helper
 	make -C ../filters
 	mkdir -p resultados
+	make -C filtros
 
 $(BUILD_DIR)/%.o: ../%.c
 	$(CC) $(CFLAGS) -c -o $@ $< -lm
@@ -51,7 +54,7 @@ $(BUILD_DIR)/%.o: %.c
 
 clean:
 	rm -fr $(BUILD_DIR)/*
-	rm tp2_exp
+	rm -f tp2_exp
 
 
 

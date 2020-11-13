@@ -15,8 +15,10 @@ extern filtro_t ColorBordes;
 extern filtro_t ImagenFantasma;
 extern filtro_t PixeladoDiferencial;
 extern filtro_t ReforzarBrillo;
+extern filtro_t ImagenFantasma_enteros;
+extern filtro_t ImagenFantasma_x4;
 
-filtro_t filtros[4];
+filtro_t filtros[6];
 
 // ~~~ fin de seteo de filtros ~~~
 
@@ -26,6 +28,8 @@ int main( int argc, char** argv ) {
     filtros[1] = ImagenFantasma;
     filtros[2] = PixeladoDiferencial;
     filtros[3] = ReforzarBrillo;
+    filtros[4] = ImagenFantasma_enteros;
+    filtros[5] = ImagenFantasma_x4;
 
     configuracion_t config;
     config.dst.width = 0;
@@ -70,22 +74,20 @@ filtro_t* detectar_filtro(configuracion_t *config) {
     return NULL;
 }
 
-void imprimir_tiempos_ejecucion(struct timespec start, struct timespec end, int cant_iteraciones) {
+void imprimir_tiempos_ejecucion(unsigned long long int start, unsigned long long int end, int cant_iteraciones, FILE *pfile) {
+    unsigned long long int cant_ciclos = end-start;
+    fprintf(pfile, "%llu\n", cant_ciclos );
+}
+
+void imprimir_tiempos_ejecucion2(struct timespec start, struct timespec end, int cant_iteraciones, FILE *pfile) {
     long cant_nanos = end.tv_nsec - start.tv_nsec;
     double cant_segundos = end.tv_sec - start.tv_sec;
-
     double cant_micros = ((double) cant_nanos / 1000) + (cant_segundos * 1000000);  // convierto a microsegundos
-   
-    cant_segundos = cant_segundos + (double) (cant_nanos / 1000000000); // convierto a segundos
-   
-    printf("Tiempo de ejecución:\n");
-    printf("  # microsegundos totales: %.3f\n", cant_micros);
-    printf("  # segundos totales: %.3f\n", (double)cant_segundos);
+    fprintf(pfile, "%.3f\n", cant_micros );    
 }
 
 void correr_filtro_imagen(configuracion_t *config, aplicador_fn_t aplicador) {
     imagenes_abrir(config);
-    struct timespec start, end;
 
     imagenes_flipVertical(&config->src, src_img);
     imagenes_flipVertical(&config->dst, dst_img);
@@ -93,14 +95,55 @@ void correr_filtro_imagen(configuracion_t *config, aplicador_fn_t aplicador) {
         imagenes_flipVertical(&config->src_2, src_img2);
     }
 
-    clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+    char nameFiltro1[50] = "resultados/";
+    strcat(nameFiltro1,config->nombre_filtro);
+    strcat(nameFiltro1,"_micros.csv");
+
+    struct timespec start2, end2;
+
+    FILE *pfile1 = fopen(nameFiltro1,"a");
+
     for (int i = 0; i < config->cant_iteraciones; i++) {
-            aplicador(config);
+        clock_gettime(CLOCK_MONOTONIC, &start2);
+        aplicador(config);
+        clock_gettime(CLOCK_MONOTONIC, &end2);
+        imprimir_tiempos_ejecucion2(start2, end2, config->cant_iteraciones, pfile1);
     }
-    clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+    fclose(pfile1);
 
     imagenes_flipVertical(&config->dst, dst_img);
     imagenes_guardar(config);
     imagenes_liberar(config);
-    imprimir_tiempos_ejecucion(start, end, config->cant_iteraciones);
+
+//repito
+    
+    imagenes_abrir(config);
+
+
+    imagenes_flipVertical(&config->src, src_img);
+    imagenes_flipVertical(&config->dst, dst_img);
+    if(config->archivo_entrada_2 != 0) {
+        imagenes_flipVertical(&config->src_2, src_img2);
+    }
+    
+    char nameFiltro2[50] = "resultados/";
+    strcat(nameFiltro2,config->nombre_filtro);
+    strcat(nameFiltro2,"_ciclos.csv");
+
+    unsigned long long start, end;
+
+    FILE *pfile2 = fopen(nameFiltro2,"a");
+    
+    for (int i = 0; i < config->cant_iteraciones; i++) {
+        MEDIR_TIEMPO_START(start)
+        aplicador(config);
+        MEDIR_TIEMPO_STOP(end)
+        imprimir_tiempos_ejecucion(start, end, config->cant_iteraciones, pfile2);
+    }
+    fclose(pfile2);
+
+    imagenes_flipVertical(&config->dst, dst_img);
+
+    imagenes_guardar(config);
+    imagenes_liberar(config);
 }
