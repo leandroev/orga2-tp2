@@ -14,15 +14,12 @@ filtro3=_x4
 cant_filtros=3
 
 
-if [ -e  $base$filtro1$datosBase ]; then
-	rm -f $base$filtro1$datosBase
-	rm -f $base$filtro2$datosBase
-	rm -f $base$filtro3$datosBase
+if [ -e  resultados ]; then
+	rm -f -r resultados
+	
 fi
 
-if [  ! -d  resultados ]; then
-	mkdir -p resultados
-fi
+mkdir -p resultados
 
 if [ $# -lt 2 ] || [ $# -gt 5 ];	then
 	echo "Faltan argumentos:
@@ -71,4 +68,3 @@ else
 	#done
 	echo "Fin del programa"
 fi	
-
