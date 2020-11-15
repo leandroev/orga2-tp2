@@ -20,6 +20,26 @@ if [ -e  resultados ]; then
 fi
 
 mkdir -p resultados
+mkdir -p resultados/multi
+
+if [ -z $4 ]; then
+	offsetX=100
+else
+	offsetX=$4
+fi
+
+if [ -z $5 ]; then
+	offsetY=100
+else
+	offsetY=$5
+fi
+
+if [ -z $3 ]; then
+	iteraciones=1
+else
+	iteraciones=$3
+fi
+
 
 if [ $# -lt 2 ] || [ $# -gt 5 ];	then
 	echo "Faltan argumentos:
@@ -31,36 +51,48 @@ if [ $# -lt 2 ] || [ $# -gt 5 ];	then
 		Parametro 4: offsetx
 		Parametro 5: offsety"
 else
+
 	if [ $# -eq 2 ];	then
 		echo "Cantidad de iteraciones 1!"
 		#../build/tp2 ImagenFantasma$1 -i $2 $3 0 0 >> $file_location1
-		./tp2_exp ImagenFantasma$filtro1 -i $1 $2 0 0 
-		./tp2_exp ImagenFantasma$filtro2 -i $1 $2 0 0 
-		./tp2_exp ImagenFantasma$filtro3 -i $1 $2 0 0 
+		./tp2_exp ImagenFantasma$filtro1 -i $1 $2 $offsetX $offsetY
+		./tp2_exp ImagenFantasma$filtro2 -i $1 $2 $offsetX $offsetY
+		./tp2_exp ImagenFantasma$filtro3 -i $1 $2 $offsetX $offsetY 
 	else
 		echo "Cantidad de iteraciones $3!"
 		if [ $# -eq 3 ];	then
 			#../build/tp2 ImagenFantasma$1 -i $2 $3 0 0 >> $file_location1
-			./tp2_exp ImagenFantasma$filtro1 -i $1 -t $3 $2 0 0 
-			./tp2_exp ImagenFantasma$filtro2 -i $1 -t $3 $2 0 0 
-			./tp2_exp ImagenFantasma$filtro3 -i $1 -t $3 $2 0 0 
+			./tp2_exp ImagenFantasma$filtro1 -i $1 -t $3 $2 $offsetX $offsetY
+			./tp2_exp ImagenFantasma$filtro2 -i $1 -t $3 $2 $offsetX $offsetY
+			./tp2_exp ImagenFantasma$filtro3 -i $1 -t $3 $2 $offsetX $offsetY 
 		fi	
 
 		if [ $# -eq 4 ];	then
 			#../build/tp2 ImagenFantasma$1 -i $2 $3 $5 0 >> $file_location1
-			./tp2_exp ImagenFantasma$filtro1 -i $1 -t $3 $2 $4 0 
-			./tp2_exp ImagenFantasma$filtro2 -i $1 -t $3 $2 $4 0 
-			./tp2_exp ImagenFantasma$filtro3 -i $1 -t $3 $2 $4 0 
+			./tp2_exp ImagenFantasma$filtro1 -i $1 -t $3 $2 $offsetX $offsetY
+			./tp2_exp ImagenFantasma$filtro2 -i $1 -t $3 $2 $offsetX $offsetY
+			./tp2_exp ImagenFantasma$filtro3 -i $1 -t $3 $2 $offsetX $offsetY 
 		fi	
 
 		if [ $# -gt 4 ]; then
 			#../build/tp2 ImagenFantasma$1 -i $2 $3 $5 $6 >> $file_location1
-			./tp2_exp ImagenFantasma$filtro1 -i $1 -t $3 $2 $4 $5 
-			./tp2_exp ImagenFantasma$filtro2 -i $1 -t $3 $2 $4 $5 
-			./tp2_exp ImagenFantasma$filtro3 -i $1 -t $3 $2 $4 $5 
+			./tp2_exp ImagenFantasma$filtro1 -i $1 -t $3 $2 $offsetX $offsetY
+			./tp2_exp ImagenFantasma$filtro2 -i $1 -t $3 $2 $offsetX $offsetY
+			./tp2_exp ImagenFantasma$filtro3 -i $1 -t $3 $2 $offsetX $offsetY 
 		fi
 	fi
 	
+	# ejecucion con todas las imagenes
+	for filename in imagenes/*.bmp; do
+		./tp2_exp_multi ImagenFantasma$filtro1 -i $1 -t $iteraciones "$filename" $offsetX $offsetY
+		./tp2_exp_multi ImagenFantasma$filtro2 -i $1 -t $iteraciones "$filename" $offsetX $offsetY
+		./tp2_exp_multi ImagenFantasma$filtro3 -i $1 -t $iteraciones "$filename" $offsetX $offsetY
+	done
+
+	for filename in resultados/multi/*micros.csv; do
+		rm "$filename"
+	done
+
 	#for (( i = 0; i < $cant_filtros; i++ )); do
 	#	grep  -w "microsegundos" $basearrayfiltro[$i]$datosBase | grep  -oP '[0-9.]*' | cat > $base$filtro$i$datos$i
 	#	grep  -w "por llamada" $basearrayfiltro[$i]$datosBase | grep  -oP '[0-9.]*' | cat > $base$filtro$i$datos$i

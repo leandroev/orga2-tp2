@@ -32,8 +32,8 @@ void aplicar_ImagenFantasma_x4(configuracion_t *config)
     int offsety = extra.offsety;
     if( offsetx < 0 ) offsetx = 0;
     if( offsety < 0 ) offsety = 0;
-    if( offsetx > info.width ) offsetx = info.width/2;
-    if( offsety > info.height ) offsety = info.height/2;
+    if( offsetx > info.width/2 + 1) offsetx = info.width/2 + 1;
+    if( offsety > info.height/2 + 1) offsety = info.height/2 + 1;
     ImagenFantasma_x4(info.bytes, config->dst.bytes, info.width, info.height, 
               info.row_size, config->dst.row_size, offsetx, offsety);
 }

@@ -7,6 +7,7 @@ from pandas.plotting import register_matplotlib_converters
 import pandas as pd
 import math
 import random
+import glob
 
 
 # Percentile, return an array with the 80-percetile 
@@ -33,8 +34,8 @@ def remove_outliers(array):
 
 #Medicion ImagenFantasma
 #Cargo los datos csv 
-datos_micros_fantasma = pd.read_csv("ImagenFantasma_micros.csv",header=None)
-datos_ciclos_fantasma = pd.read_csv("ImagenFantasma_ciclos.csv",header=None)
+datos_micros_fantasma = pd.read_csv("../resultados/ImagenFantasma_micros.csv",header=None)
+datos_ciclos_fantasma = pd.read_csv("../resultados/ImagenFantasma_ciclos.csv",header=None)
 
 arr_micros_fantasma = np.array(datos_micros_fantasma[0])
 arr_ciclos_fantasma = np.array(datos_ciclos_fantasma[0])
@@ -42,8 +43,8 @@ arr_ciclos_fantasma = np.array(datos_ciclos_fantasma[0])
 
 #Medicion ImagenFantasma_enteros
 #Cargo los datos csv 
-datos_micros_fantasma_ent = pd.read_csv("ImagenFantasma_enteros_micros.csv",header=None)
-datos_ciclos_fantasma_ent = pd.read_csv("ImagenFantasma_enteros_ciclos.csv",header=None)
+datos_micros_fantasma_ent = pd.read_csv("../resultados/ImagenFantasma_enteros_micros.csv",header=None)
+datos_ciclos_fantasma_ent = pd.read_csv("../resultados/ImagenFantasma_enteros_ciclos.csv",header=None)
 
 
 arr_micros_fantasma_ent = np.array(datos_micros_fantasma_ent[0])
@@ -51,8 +52,8 @@ arr_ciclos_fantasma_ent = np.array(datos_ciclos_fantasma_ent[0])
 
 #Medicion ImagenFantasma_enteros
 #Cargo los datos csv 
-datos_micros_fantasma_x4 = pd.read_csv("ImagenFantasma_x4_micros.csv",header=None)
-datos_ciclos_fantasma_x4 = pd.read_csv("ImagenFantasma_x4_ciclos.csv",header=None)
+datos_micros_fantasma_x4 = pd.read_csv("../resultados/ImagenFantasma_x4_micros.csv",header=None)
+datos_ciclos_fantasma_x4 = pd.read_csv("../resultados/ImagenFantasma_x4_ciclos.csv",header=None)
 
 
 arr_micros_fantasma_x4 = np.array(datos_micros_fantasma_x4[0])
@@ -102,7 +103,7 @@ plt.ylabel('Microsegundos')
 plt.subplot(1,2,2)
 plt.bar(implementaciones_micros,micros, color = 'lightseagreen')
 plt.ylabel('Microsegundos')
-plt.ticklabel_format(style='plain', axis='y')
+#plt.ticklabel_format(style='plain', axis='y')
 plt.show()
 
 #######################################################################################################################################
@@ -115,7 +116,7 @@ plt.ylabel('Ticks de reloj')
 plt.subplot(1,2,2)
 plt.bar(implementaciones_ciclos,ciclos, color = 'lightseagreen')
 plt.ylabel('Ticks de reloj')
-plt.ticklabel_format(style='plain', axis='y')
+#plt.ticklabel_format(style='plain', axis='y')
 plt.show()
 
 #######################################################################################################################################
@@ -128,7 +129,7 @@ plt.ylabel('Microsegundos')
 plt.subplot(1,2,2)
 plt.bar(implementaciones_micros2,micros2, color = 'dodgerblue')
 plt.ylabel('Microsegundos')
-plt.ticklabel_format(style='plain', axis='y')
+#plt.ticklabel_format(style='plain', axis='y')
 plt.show()
 
 #######################################################################################################################################
@@ -141,9 +142,25 @@ plt.ylabel('Ticks de reloj')
 plt.subplot(1,2,2)
 plt.bar(implementaciones_ciclos2,ciclos2, color = 'dodgerblue')
 plt.ylabel('Ticks de reloj')
-plt.ticklabel_format(style='plain', axis='y')
+#plt.ticklabel_format(style='plain', axis='y')
 plt.show()
 
 
+#######################################################################################################################################
 
+res = []
+data = pd.DataFrame()
+for filename in glob.glob('../resultados/multi/*ciclos.csv'):
+	print(filename)
+	datos = pd.read_csv(filename,header=None)
+	arr_ciclos = np.array(datos[0])
+	array_ciclos = remove_outliers(arr_ciclos)
+	media = np.mean(array_ciclos)
+	res.append((filename,media))
+
+pd.DataFrame(res).to_csv("medias_multi.csv")
+
+
+
+	
 

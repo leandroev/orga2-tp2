@@ -19,16 +19,21 @@ OBJS = $(MAIN_OBJS) $(LIBS_OBJS) $(FILTROS_OBJ)
 OBJS_CON_PATH = $(addprefix $(BUILD_DIR)/, $(OBJS))
 
 BIN2 = tp2_exp
+BIN3 = tp2_exp_multi
 
 MAIN_OBJS2   = tp2_exp.o cli.o
+MAIN_OBJS3   = tp2_exp_multi.o cli.o
 MAIN_OBJS_CON_PATH2 = $(addprefix $(BUILD_DIR)/, $(MAIN_OBJS2))
+MAIN_OBJS_CON_PATH3 = $(addprefix $(BUILD_DIR)/, $(MAIN_OBJS3))
 
 OBJS2 = $(MAIN_OBJS2) $(LIBS_OBJS) $(FILTROS_OBJ)
+OBJS3 = $(MAIN_OBJS3) $(LIBS_OBJS) $(FILTROS_OBJ)
 OBJS_CON_PATH2 = $(addprefix $(BUILD_DIR)/, $(OBJS2))
+OBJS_CON_PATH3 = $(addprefix $(BUILD_DIR)/, $(OBJS3))
 
 .PHONY: all clean FORCE
 
-all: $(BUILD_DIR)/$(BIN) exp
+all: $(BUILD_DIR)/$(BIN) exp exp2
 
 $(BUILD_DIR)/$(BIN): FORCE $(MAIN_OBJS_CON_PATH)
 	$(CC) $(CFLAGS) $(OBJS_CON_PATH) -o $@ -lm
@@ -37,6 +42,11 @@ exp: $(BIN2)
 
 $(BIN2): $(MAIN_OBJS_CON_PATH2)
 	$(CC) $(CFLAGS) $(OBJS_CON_PATH2) -o $@ -lm
+
+exp2: $(BIN3)
+
+$(BIN3): $(MAIN_OBJS_CON_PATH3)
+	$(CC) $(CFLAGS) $(OBJS_CON_PATH3) -o $@ -lm
 
 export CFLAGS64
 FORCE:
@@ -55,6 +65,4 @@ $(BUILD_DIR)/%.o: %.c
 clean:
 	rm -fr $(BUILD_DIR)/*
 	rm -f tp2_exp
-
-
-
+	rm -f tp2_exp_multi

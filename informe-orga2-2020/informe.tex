@@ -122,7 +122,6 @@
 El objetivo de este trabajo práctico consiste en poner en práctica el modelo de procesamiento \textbf{SIMD} (Single Instruction, Multiple Data), que nos ofrece la microarquitectura \textbf{INTEL64}. Este modelo nos permite programar en forma paralela a nivel de datos, es decir, realizar una misma operación sobre un conjunto de datos. A diferencia del modelo \textbf{SISD} (Single Instruction, Single Data) que opera de forma escalar, es decir, un dato por instrucción. \\
 Cada una de estas instrucciones interpreta los datos en un tamaño particular, sin importar lo que estos representen. 
 
-
 \begin{figure}[h]
   \begin{center}
 	\includegraphics[scale=0.66]{img/simd.jpg}
@@ -175,9 +174,29 @@ La siguiente serie de parámetros son provistos a todos los filtros en el siguie
 \input{Filtros/Pixelado}
 
 \section{Experimentación}
+\subsection{Información relevante}:
+En una computadora siempre hay varios procesos que están en ejecución, aunque no en simultáneo debido a la velocidad en la que trabajan los procesadores no es algo que podamos percibir dando esta sensación de continuidad, sino que mientras uno está siendo ejecutado los demás esperan para que sea su turno, ya sea porque el anterior proceso terminó o pasará a la lista de espera con los demás procesos.Al menos esto sucede en procesadores de un sólo core, los multi-core pueden correr más tareas en simultáneo, pero aún así siempre va a haber un gran número de tareas en espera, o puede llegar una interrupción que debe ser atendida.
 
-\newpage
+Para analizar las implementaciones experimentales se tomaron medidas de tiempo (ciclos de reloj y microsegundos). 
+Los ciclos de reloj se tomaron con con el soporte de la instrucción \textbf{rdtsc} que permite obtener el valor del \textbf{Time Stamp Counter} (TSC) del procesador. Que es un registro que aumenta con cada ciclo del procesador, la cátedra provee esta función, que retorna la diferencia entre la cantidad de ciclos antes y después del llamado al filtro, obteniendo la cantidad de ciclos de la ejecución.
+Para tomar los microsegundos se utilizó la función \textbf{clock_gettime} que toma el tiempo en el momento específico en un buffer. De la misma forma en la que se calculan los ciclos de ejecución, se toman el tiempo inicial y final de la ejecución del ciclo y se calcula la diferencia en microsegundos.
+
+Por el hecho de que hay varios procesos ejecutándose en cortos periodos de tiempo, no son exactas estas mediciones. Pero las mediciones se trataron de realizar lo más preciso posible y se tomó sólo la parte de ejecución del ciclo, no se tuvo en cuenta la carga y guardado de las imágenes Para cada experimento los filtros se ejecutaron 200 veces con imágenes de tamaño 1280x1024 pixeles. 
+Los dos experimentos llevados a cabo son sobre la ImagenFantasma y con los offset máximos posibles.
+
+También se corrieron bajo los comandos \textbf{nice} para que el programa tenga una mayor prioridad y \textbf{taskset} para asignarle un sólo core, de forma que sea menos probable que en un cambio de contexto sea desalojada, y se desaloje la asignada al otro core.
+
+Los experimentos se corrieron con la ayuda de un script para que sea automatizado y no haya que hacer demasiadas manualidades junto con makefiles y \"copias\" modificadas del ejecutable tp2, para correr los filtros experimentales y generar los datos necesarios para su análisis. 
+
+Todo se realizó en una notebook con un procesador \textbf{Intel Pentium B980} doble núcleo con una frecuencia base 2,40 GHz.
+
+\input{Experimentacion/enteros}
+
+\input{Experimentacion/x4}    
+
 \section{Conclusión}
-
+Llegando al final del trabajo, podemos concluir que el modelo de procesamiento vectorial es una gran herramienta para trabajar con muchos datos que deben ser procesados por igual. Por lo general nos permite reducir la cantidad de iteraciones que los que haríamos con operaciones \textbf{SISD}, y permitiéndonos tener una mejor precisión para los datos de punto flotante. 
+Aunque tiene cierta dificultad, al no estar habituado al modelo, como saber interpretar cuál es el estado de los registros que uno usa, que contienen, que representan y cómo manipularlos, puede ser muy fácil equivocarse y obtener resultados no deseados. Lo mismo con los accesos a memoria, hay que tener la certeza de acceder a datos que nos sean accesibles.
+Teniendo todo eso presente, el modelo de programación vectorial es sumamente efectivo para aplicaciones multimedia.
 \end{document}
 
