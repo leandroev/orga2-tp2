@@ -1,6 +1,6 @@
 # orga2-tp2
 
-Este trabajo práctico consiste en implementar filtros gráficos utilizando el modelo de procesamiento SIMD.
+Este trabajo práctico consiste en implementar filtros gráficos utilizando el modelo de procesamiento SIMD.  
 
 Incluye herramientas de test y tiempo. Además de un informe como resultado de experimentaciones.
 
