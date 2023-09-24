@@ -1,7 +1,8 @@
 # orga2-tp2
 
 Este trabajo práctico consiste en implementar filtros gráficos utilizando el modelo de procesamiento SIMD.
-Incluye herramientas de test y tiempo.
+
+Incluye herramientas de test y tiempo. Además de un informe como resultado de experimentaciones.
 
 ## Compilación
 Ejecutar make desde la carpeta src. Cada directorio tiene su propio Makefile.
