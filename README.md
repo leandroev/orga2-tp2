@@ -1,4 +1,4 @@
-# orga2-tp2
+# orga2-tp2 filtros imagen bmp
 
 Este trabajo práctico consiste en implementar filtros gráficos utilizando el modelo de procesamiento SIMD.  
 
