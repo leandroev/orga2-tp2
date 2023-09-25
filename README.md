@@ -1,4 +1,4 @@
-# organización del computador 2 - tp2 filtros imagen bmp
+# organización del computador II - tp2 filtros imagen bmp
 
 Este trabajo práctico consiste en implementar filtros gráficos utilizando el modelo de procesamiento SIMD.  
 
