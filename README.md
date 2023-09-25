@@ -12,7 +12,7 @@ El uso del programa principal es el siguiente:
 $ ./tp2 <nombre_filtro> <opciones> <nombre_archivo_entrada> [parámetros...]
 
 Los filtros que se pueden aplicar y sus parámetros son ImagenFantasma_asm y ColorBordes_asm.
-Las opciones que acepta el programa son las siguientes:  
+Las opciones que acepta el programa son las siguientes:    
 		-h, --help  (Imprime la ayuda).  
     -i, --implementacion NOMBRE_MODO (Implementación sobre la que se ejecutará el proceso seleccionado, las implementaciones 
     disponibles son: c, asm).  
